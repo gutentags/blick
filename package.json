@@ -1,0 +1,32 @@
+{
+  "name": "blick",
+  "version": "0.0.0",
+  "description": "Coordinates component animation",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasminum test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gutentags/blick.git"
+  },
+  "keywords": [
+    "animation",
+    "animate",
+    "frame",
+    "draw",
+    "transition"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gutentags/blick/issues"
+  },
+  "homepage": "https://github.com/gutentags/blick",
+  "dependencies": {
+    "raf": "^2.0.4"
+  },
+  "devDependencies": {
+    "jasminum": "0.0.4"
+  }
+}
