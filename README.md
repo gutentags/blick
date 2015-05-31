@@ -73,7 +73,15 @@ In each phase, every component that has requested that phase will execute.
     intended state.
     The component will need to request another measurement if it wishes to do so
     on a subsequent animation frame.
--   **transition:** The animation controller will call `transition()` on every
+
+-   **transition:** The transition phase is for setting up CSS transitions.
+    If a CSS transition does not proceed from the current state on document,
+    you use the transition phase in one animation frame to set up the initial
+    state.
+    You can simultaneously schedule a draw or redraw to follow up with the
+    transition to the intended final state.
+
+    The animation controller will call `transition()` on every
     component that has requested a transition on the next animation frame.
     If a component has requested that it have an opportunity to draw or redraw
     before it starts a transition, this phase will be skipped for this animation
@@ -81,15 +89,18 @@ In each phase, every component that has requested that phase will execute.
     Once the transition has been initiated, the component will need to request
     another opportunity to transition if it wishes to make a change in a
     subsequent animation frame.
+
 -   **animate:** The animation controller will call `animate()` on every
     component that has requested an opportunity to animate on every animation
     frame.
     The component must explicitly cancel animation if it wishes to stop
     animating.
+
 -   **draw:** The animation controller will call `draw()` on every component
     that has requested an opportunity to draw itself onto the document on the
     next animation frame.
     Drawing is intended to occur only once when a component enters the document.
+
 -   **redraw:** The animation controller will call `redraw()` on every component
     that has requested an opportunity to redraw itself onto the document on the
     next animation frame.
