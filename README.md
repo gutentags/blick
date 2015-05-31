@@ -1,10 +1,24 @@
 
 # Blick
 
-:warning: This has yet to be implemented.
-
 Blick is a JavaScript component animation controller based on the lower level
 animation frame handler.
+The animator batches reads and writes by coordinating measurement, transitions,
+animation, drawing, and redrawing.
+Each component retains its own part of the animation controller so there is no
+garbage collector churn frame to frame.
+This coordinated draw cycle enables a wide variety of cooperative scenarios:
+
+- Components that need to measure their bounding boxes before drawing.
+- Components that need to redraw on every animation frame because their model
+  changes continuously.
+- Components that need to draw initially then redraw in response to discrete
+  model changes.
+- Components that need to set their initial position (with transitions
+  disabled) in one animation frame, and set their target position (with
+  transitions enabled) in a subsequent animation frame.
+- Components that need to resize text until it fits the bounding box exactly.
+
 
 ## Installation
 
@@ -18,9 +32,9 @@ Just to get started, create an animation controller and add a component.
 This will create and return an animation controller for your component.
 
 ```js
-var AnimationController = require("blick");
-var animationController = new AnimationController();
-var componentAnimationController = animator.add(component);
+var Animator = require("blick");
+var animator = new AnimationController();
+component.animator = animator.add(component);
 ```
 
 The animation controller expects that the component will request that the
@@ -53,7 +67,7 @@ In each phase, every component that has requested that phase will execute.
 -   **measure:** The animation controller will call `measure()` on every
     component that has requested an opportunity to measure its rendered state on
     the document in the first phase of the next animation frame.
-    This may include measuring its size or position.
+    This may include measuring its size, position, or computed styles.
     The component may at this point decide whether to request or cancel any
     subsequent phases depending on whether the measured state reflects the
     intended state.
@@ -208,7 +222,7 @@ phase.
 
 ## Copyright and License
 
-Copyright (c) 2015 by contributors.
+Copyright (c) 2015 by Kris Kowal and contributors.
 All rights reserved.
 MIT License.
 

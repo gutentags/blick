@@ -2,7 +2,7 @@
   "name": "blick",
   "version": "0.0.0",
   "description": "Coordinates component animation",
-  "main": "index.js",
+  "main": "./animator.js",
   "scripts": {
     "test": "jasminum test"
   },
