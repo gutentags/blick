@@ -5,6 +5,7 @@ var defaultRequestAnimation = require("raf");
 module.exports = Animator;
 
 function Animator(requestAnimation) {
+    // TODO accept timers
     var self = this;
     self._requestAnimation = requestAnimation || defaultRequestAnimation;
     self.controllers = [];
@@ -20,6 +21,8 @@ function Animator(requestAnimation) {
     };
 }
 
+Animator.freeList = [];
+
 Animator.prototype.requestAnimation = function () {
     if (!this.requested) {
         this._requestAnimation(this._animate);
@@ -32,12 +35,13 @@ Animator.prototype.animate = function () {
     var node, temp;
 
     this.requested = false;
+    var now = Date.now();
 
     // Measure
     for (var index = 0; index < this.controllers.length; index++) {
         var controller = this.controllers[index];
         if (controller.measure) {
-            controller.component.measure();
+            controller.component.measure(now);
             controller.measure = false;
         }
     }
@@ -49,7 +53,7 @@ Animator.prototype.animate = function () {
         // the schedule for the next animation frame.
         if (controller.transition) {
             if (!controller.draw && !controller.redraw) {
-                controller.component.transition();
+                controller.component.transition(now);
                 controller.transition = false;
             } else {
                 this.requestAnimation();
@@ -62,7 +66,7 @@ Animator.prototype.animate = function () {
     for (var index = 0; index < this.controllers.length; index++) {
         var controller = this.controllers[index];
         if (controller.animate) {
-            controller.component.animate();
+            controller.component.animate(now);
             this.requestAnimation();
             // Unlike others, not reset implicitly.
         }
@@ -72,7 +76,7 @@ Animator.prototype.animate = function () {
     for (var index = 0; index < this.controllers.length; index++) {
         var controller = this.controllers[index];
         if (controller.draw) {
-            controller.component.draw();
+            controller.component.draw(now);
             controller.draw = false;
         }
     }
@@ -81,30 +85,54 @@ Animator.prototype.animate = function () {
     for (var index = 0; index < this.controllers.length; index++) {
         var controller = this.controllers[index];
         if (controller.redraw) {
-            controller.component.redraw();
+            controller.component.redraw(now);
             controller.redraw = false;
         }
     }
 };
 
 Animator.prototype.add = function (component) {
-    var controller = new AnimationController(component, this);
+    var controller;
+    if (this.constructor.freeList.length) {
+        controller = this.constructor.freeList.pop();
+    } else {
+        controller = new AnimationController();
+    }
+    controller.init(component, this, this.controllers.length);
     this.controllers.push(controller);
     return controller;
 };
 
-function AnimationController(component, controller) {
+Animator.prototype.removeController = function (controller) {
+    var index = controller.index;
+    var lastIndex = this.controllers.length - 1;
+    var lastController = this.controllers[lastIndex];
+    this.controllers[index] = lastController;
+    lastController.index = index;
+    controller.index = null;
+    controller.controllers = null;
+    controller.component = null;
+    // TODO freeList
+    this.controllers.pop();
+};
+
+function AnimationController() {
+}
+
+AnimationController.prototype.init = function init(component, controller, index) {
     this.component = component;
     this.controller = controller;
+    this.index = index;
 
     this.measure = false;
     this.transition = false;
     this.animate = false;
     this.draw = false;
     this.redraw = false;
-}
+};
 
 AnimationController.prototype.destroy = function () {
+    this.controller.removeController(this);
 };
 
 AnimationController.prototype.requestMeasure = function () {
